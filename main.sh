@@ -4,11 +4,8 @@
 start_date=$(date +%s)
 dates=()
 
-# Determine the directory where the script is located
-SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 # Specify the path to your.env file relative to the script directory
-ENV_FILE="$SCRIPT_DIR/.env"
+ENV_FILE=".env"
 
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
@@ -51,12 +48,12 @@ for curr_date in "${dates[@]}"; do
 
     # Determine the start of the current week, the start of the next week, and the start of the week after that
     if ((current_day < 2)); then
-        # Today is before Thursday, so the current week starts on Monday
+        # Today is Monday, so the current week starts on THIS Monday
         current_week_start=$(date -d "this Monday" +%s)
         next_week_start=$((current_week_start + 604800))         # Start of the next week
         week_after_next_week_start=$((next_week_start + 604800)) # Start of the week after the next week
     else
-        # Today is Thursday or later, so the current week starts on the previous Monday
+        # Today is Tuesday or later, so the current week starts on the LAST Monday
         current_week_start=$(date -d "last Monday" +%s)
         next_week_start=$((current_week_start + 604800))         # Start of the next week
         week_after_next_week_start=$((next_week_start + 604800)) # Start of the week after the next week
@@ -76,9 +73,11 @@ for curr_date in "${dates[@]}"; do
 
     # if curr_date is in this week or next week then check for available slots in G
     if [[ $this_week == true || $next_week == true ]]; then
-        echo "Checking G for: $(date -d @$curr_date '+%F (%A)')"
+
+        echo "Checking PLACE_1 for: $(date -d @$curr_date '+%F (%A)')"
+
         # Execute the curl command and process the output
-        result=$(curl -skb client_session=${cookie} ${url1} |
+        result=$(curl -skb $cookie_name=$cookie $url1 |
             grep -o '"time":[0-9]*' |
             grep -o '[0-9]*' |
             xargs -I {} date -d @{} |
@@ -87,17 +86,18 @@ for curr_date in "${dates[@]}"; do
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
             echo "Found!"
-            echo "G: $result"
-            concatenated_result+=("G: $result ")
+            echo "PLACE_1: $result"
+            concatenated_result+=("$PLACE_1: $result ")
         fi
     fi
 
     # if curr_date is in this week or in 2 weeks then check for available slots in M
     if [[ true ]]; then
 
-        echo "Checking M for: $(date -d @$curr_date '+%F (%A)')"
+        echo "Checking PLACE_2 for: $(date -d @$curr_date '+%F (%A)')"
+
         # Execute the curl command and process the output
-        result=$(curl -skb client_session=${cookie} ${url2} |
+        result=$(curl -skb $cookie_name=$cookie $url2 |
             grep -o '"time":[0-9]*' |
             grep -o '[0-9]*' |
             xargs -I {} date -d @{} |
@@ -106,15 +106,33 @@ for curr_date in "${dates[@]}"; do
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
             echo "Found!"
-            echo "M: $result"
-            concatenated_result+=("M: $result ")
+            echo "PLACE_2: $result"
+            concatenated_result+=("$PLACE_2: $result ")
         fi
     fi
 done
 
-echo
-echo "Available slots:"
+formatted_result="Available slots:\n"
 
 for i in "${concatenated_result[@]}"; do
-    echo "$i"
+    formatted_result+="$i\n"
 done
+
+# Read the value of previous_result from the file
+previous_result=$(cat previous_result.txt)
+
+# print whether prev is equal to cur or not
+echo
+
+# Check if the current result is the same as the previous result or if the current result is only "Available slots:\n"
+if [ "$formatted_result" == "Available slots:\n" ] || [ "$formatted_result" == "$previous_result" ]; then
+    echo "No change or empty result detected"
+else
+    echo "Change detected"
+
+    # Send the email
+    # sendemail -f "$EMAIL" -t "$TO" -u "$SUBJECT" -m "$formatted_result \n\n$url_1\n\n$url_2" -s "$SMTP_SERVER:$SMTP_PORT" -xu "$EMAIL" -xp "$PASSWORD" -o tls=yes
+fi
+
+# Store the value of previous_result in a file
+echo "$formatted_result" >previous_result.txt
