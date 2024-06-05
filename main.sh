@@ -1,36 +1,44 @@
 #!/bin/bash
 
-# Get the cookie from the file
-cookie="<YOUR_SESSION_TOKEN>"
-
-# url1
-base_url="<BASE_URL>"
-const_url1="${base_url}<URL1_CUSTOM>"
-const_url2="${base_url}<URL1_CUSTOM>"
-param="<CUSTOM_PARAM>"
-
-
 # Initialize the start date to today
 start_date=$(date +%s)
-dates=();
+dates=()
+
+# Determine the directory where the script is located
+SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Specify the path to your.env file relative to the script directory
+ENV_FILE="$SCRIPT_DIR/.env"
+
+# Check if the.env file exists
+if [ -f "$ENV_FILE" ]; then
+
+    # Read the.env file line by line
+    while IFS= read -r line; do
+
+        # Skip comments and empty lines
+        if [[ "$line" =~ ^\s*#.*$ || -z "$line" ]]; then
+            continue
+        fi
+
+        # Split the line into key and value
+        key=$(echo "$line" | cut -d '=' -f 1)
+        value=$(echo "$line" | cut -d '=' -f 2-)
+
+        # Remove single quotes, double quotes, and leading/trailing spaces from the value
+        value=$(echo "$value" | sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' -e 's/^[ \t]*//;s/[ \t]*$//')
+
+        # Assign the key and value as local variables
+        eval "$key='$value'"
+    done <"$ENV_FILE"
+fi
 
 # Loop for the next 14 days
 for i in $(seq 0 14); do
     # Calculate the Unix timestamp for the next day
     next_day_timestamp=$((start_date + i * 86400))
-    
-    # Format the timestamp as a human-readable date
-    readable_date=$(date -d @$next_day_timestamp '+%F (%A)')
-    
-    # Print the Unix timestamp and the corresponding date
-    # echo "Day $i:"
-    # echo "Timestamp: $next_day_timestamp"
-    # echo "Readable Date: $readable_date"
-    # echo ""
     dates+=($next_day_timestamp)
 done
-
-# echo ${dates[@]}
 
 # Loop through each URL
 for curr_date in "${dates[@]}"; do
@@ -42,18 +50,17 @@ for curr_date in "${dates[@]}"; do
     current_day=$(date +%u)
 
     # Determine the start of the current week, the start of the next week, and the start of the week after that
-    if (( current_day < 4 )); then
+    if ((current_day < 2)); then
         # Today is before Thursday, so the current week starts on Monday
         current_week_start=$(date -d "this Monday" +%s)
-        next_week_start=$((current_week_start + 604800)) # Start of the next week
+        next_week_start=$((current_week_start + 604800))         # Start of the next week
         week_after_next_week_start=$((next_week_start + 604800)) # Start of the week after the next week
     else
         # Today is Thursday or later, so the current week starts on the previous Monday
         current_week_start=$(date -d "last Monday" +%s)
-        next_week_start=$((current_week_start + 604800)) # Start of the next week
+        next_week_start=$((current_week_start + 604800))         # Start of the next week
         week_after_next_week_start=$((next_week_start + 604800)) # Start of the week after the next week
     fi
-
 
     # Check which week the given timestamp belongs to and echo the corresponding message
     if [[ $curr_date -ge $current_week_start && $curr_date -lt $next_week_start ]]; then
@@ -69,39 +76,45 @@ for curr_date in "${dates[@]}"; do
 
     # if curr_date is in this week or next week then check for available slots in G
     if [[ $this_week == true || $next_week == true ]]; then
+        echo "Checking G for: $(date -d @$curr_date '+%F (%A)')"
         # Execute the curl command and process the output
-        # result=$(curl -skb client_session=${cookie} ${url1} | \
-        #         grep -o '"time":[0-9]*' | \
-        #         grep -o '[0-9]*' | \
-        #         xargs -I {} date -d @{} | \
-        #         grep -E '(09|10|17|18|19|20|21):')
-                
+        result=$(curl -skb client_session=${cookie} ${url1} |
+            grep -o '"time":[0-9]*' |
+            grep -o '[0-9]*' |
+            xargs -I {} date -d @{} |
+            grep -E "(${convenient_hours}):")
+
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
-            concatenated_result+="G: $result "
+            echo "Found!"
+            echo "G: $result"
+            concatenated_result+=("G: $result ")
         fi
     fi
 
     # if curr_date is in this week or in 2 weeks then check for available slots in M
-    if [[ $this_week == true || $two_weeks_later == true ]]; then
+    if [[ true ]]; then
+
+        echo "Checking M for: $(date -d @$curr_date '+%F (%A)')"
         # Execute the curl command and process the output
-        # result=$(curl -skb client_session=${cookie} ${url2} | \
-        #         grep -o '"time":[0-9]*' | \
-        #         grep -o '[0-9]*' | \
-        #         xargs -I {} date -d @{} | \
-        #         grep -E '(09|10|17|18|19|20|21):')
-                
+        result=$(curl -skb client_session=${cookie} ${url2} |
+            grep -o '"time":[0-9]*' |
+            grep -o '[0-9]*' |
+            xargs -I {} date -d @{} |
+            grep -E "(${convenient_hours}):")
+
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
-            concatenated_result+="M: $result "
+            echo "Found!"
+            echo "M: $result"
+            concatenated_result+=("M: $result ")
         fi
     fi
-
-    echo "curr_date human readable: $(date -d @$curr_date '+%F (%A)')"
-    echo "this week: $this_week"
-    echo "next week: $next_week"
-    echo "2 weeks later: $two_weeks_later"
 done
 
-# Print the concatenated result
-echo "$concatenated_result"
+echo
+echo "Available slots:"
+
+for i in "${concatenated_result[@]}"; do
+    echo "$i"
+done
