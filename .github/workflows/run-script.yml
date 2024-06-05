@@ -12,5 +12,5 @@ jobs:
         uses: actions/checkout@v2
       
       - name: Run Bash Script
-        run:./path/to/your/script.sh
+        run:./main.sh
         shell: bash
