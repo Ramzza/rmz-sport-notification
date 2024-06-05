@@ -1,2 +1,2 @@
-# rmz-calendis-notification
-Sends notifications for freed up slots on calendis
+# rmz-sport-notification
+Sends notifications for freed up sport slots
