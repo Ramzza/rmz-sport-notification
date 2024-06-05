@@ -131,7 +131,7 @@ else
     echo "Change detected"
 
     # Send the email
-    # sendemail -f "$EMAIL" -t "$TO" -u "$SUBJECT" -m "$formatted_result \n\n$url_1\n\n$url_2" -s "$SMTP_SERVER:$SMTP_PORT" -xu "$EMAIL" -xp "$PASSWORD" -o tls=yes
+    sendemail -f "$EMAIL" -t "$TO" -u "$SUBJECT" -m "$formatted_result \n\n$url_1\n\n$url_2" -s "$SMTP_SERVER:$SMTP_PORT" -xu "$EMAIL" -xp "$PASSWORD" -o tls=yes
 fi
 
 # Store the value of previous_result in a file
