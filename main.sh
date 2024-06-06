@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "$(date): Script started" >> ./script.log
 # Initialize the start date to today
 start_date=$(date +%s)
 dates=()
@@ -75,7 +76,8 @@ for curr_date in "${dates[@]}"; do
     if [[ $this_week == true || $next_week == true ]]; then
 
         echo "Checking PLACE_1 for: $(date -d @$curr_date '+%F (%A)')"
-
+        echo "$(date): Checking PLACE_1 for: $(date -d @$curr_date '+%F (%A)')" >> ./script.log
+        
         # Execute the curl command and process the output
         result=$(curl -skb $cookie_name=$cookie $url1 |
             grep -o '"time":[0-9]*' |
@@ -86,7 +88,9 @@ for curr_date in "${dates[@]}"; do
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
             echo "Found!"
+            echo "$(date): Found!" >> ./script.log
             echo "PLACE_1: $result"
+            echo "$(date): PLACE_1: $result" >> ./script.log
             concatenated_result+=("$PLACE_1: $result ")
         fi
     fi
@@ -95,6 +99,7 @@ for curr_date in "${dates[@]}"; do
     if [[ true ]]; then
 
         echo "Checking PLACE_2 for: $(date -d @$curr_date '+%F (%A)')"
+        echo "$(date): Checking PLACE_2 for: $(date -d @$curr_date '+%F (%A)')" >> ./script.log
 
         # Execute the curl command and process the output
         result=$(curl -skb $cookie_name=$cookie $url2 |
@@ -106,7 +111,9 @@ for curr_date in "${dates[@]}"; do
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
             echo "Found!"
+            echo "$(date): Found!" >> ./script.log
             echo "PLACE_2: $result"
+            echo "$(date): PLACE_2: $result" >> ./script.log
             concatenated_result+=("$PLACE_2: $result ")
         fi
     fi
@@ -127,12 +134,15 @@ echo
 # Check if the current result is the same as the previous result or if the current result is only "Available slots:\n"
 if [ "$formatted_result" == "Available slots:\n" ] || [ "$formatted_result" == "$previous_result" ]; then
     echo "No change or empty result detected"
+    echo "$(date): No change or empty result detected" >> ./script.log
 else
     echo "Change detected"
+    echo "$(date): Change detected: $formatted_result" >> ./script.log
 
     # Send the email
-    sendemail -f "$EMAIL" -t "$TO" -u "$SUBJECT" -m "$formatted_result \n\n$url_1\n\n$url_2" -s "$SMTP_SERVER:$SMTP_PORT" -xu "$EMAIL" -xp "$PASSWORD" -o tls=yes
+    sendemail -f "$EMAIL" -t "$TO" -u "$SUBJECT" -m "$formatted_result \n\n$url_1\n\n$url_2" -s "$SMTP_SERVER:$SMTP_PORT" -xu "$EMAIL" -xp "$PASSWORD" -o tls=$SSL
 fi
 
 # Store the value of previous_result in a file
 echo "$formatted_result" >previous_result.txt
+echo "$(date): Script completed" >> ./script.log
