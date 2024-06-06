@@ -1,16 +1,17 @@
 #!/bin/bash
 
 echo "$(date): Script started" 
-echo "$(date): Script started" >> $SCRIPT_DIR/script.log
-# Initialize the start date to today
-start_date=$(date +%s)
-dates=()
 
 # Determine the directory where the script is located
 SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "$(date): Script started" >> $SCRIPT_DIR/script.log
 
 # Specify the path to your.env file relative to the script directory
 ENV_FILE="$SCRIPT_DIR/.env"
+
+# Initialize the start date to today
+start_date=$(date +%s)
+dates=()
 
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
@@ -142,6 +143,7 @@ if [ "$formatted_result" == "Available slots:\n" ] || [ "$formatted_result" == "
 else
     echo "$(date): Change detected"
     echo "$(date): Change detected: $formatted_result" >> $SCRIPT_DIR/script.log
+    $SCRIPT_DIR/wsl-notify-send.exe "$formatted_result"
 
     # Send the email
     sendemail -f "$EMAIL" -t "$TO" -u "$SUBJECT" -m "$formatted_result \n\n$url_1\n\n$url_2" -s "$SMTP_SERVER:$SMTP_PORT" -xu "$EMAIL" -xp "$PASSWORD" -o tls=$SSL
