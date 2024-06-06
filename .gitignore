@@ -1,3 +1,4 @@
 .env
 previous_result.txt
 script.log
+cron.log

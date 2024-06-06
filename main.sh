@@ -1,12 +1,16 @@
 #!/bin/bash
 
-echo "$(date): Script started" >> ./script.log
+echo "$(date): Script started" 
+echo "$(date): Script started" >> $SCRIPT_DIR/script.log
 # Initialize the start date to today
 start_date=$(date +%s)
 dates=()
 
+# Determine the directory where the script is located
+SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Specify the path to your.env file relative to the script directory
-ENV_FILE=".env"
+ENV_FILE="$SCRIPT_DIR/.env"
 
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
@@ -75,8 +79,8 @@ for curr_date in "${dates[@]}"; do
     # if curr_date is in this week or next week then check for available slots in G
     if [[ $this_week == true || $next_week == true ]]; then
 
-        echo "Checking PLACE_1 for: $(date -d @$curr_date '+%F (%A)')"
-        echo "$(date): Checking PLACE_1 for: $(date -d @$curr_date '+%F (%A)')" >> ./script.log
+        echo "$(date): Checking PLACE_1 for: $(date -d @$curr_date '+%F (%A)')"
+        echo "$(date): Checking PLACE_1 for: $(date -d @$curr_date '+%F (%A)')" >> $SCRIPT_DIR/script.log
         
         # Execute the curl command and process the output
         result=$(curl -skb $cookie_name=$cookie $url1 |
@@ -87,10 +91,10 @@ for curr_date in "${dates[@]}"; do
 
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
-            echo "Found!"
-            echo "$(date): Found!" >> ./script.log
-            echo "PLACE_1: $result"
-            echo "$(date): PLACE_1: $result" >> ./script.log
+            echo "$(date): Found!"
+            echo "$(date): Found!" >> $SCRIPT_DIR/script.log
+            echo "$(date): PLACE_1: $result"
+            echo "$(date): PLACE_1: $result" >> $SCRIPT_DIR/script.log
             concatenated_result+=("$PLACE_1: $result ")
         fi
     fi
@@ -98,8 +102,8 @@ for curr_date in "${dates[@]}"; do
     # if curr_date is in this week or in 2 weeks then check for available slots in M
     if [[ true ]]; then
 
-        echo "Checking PLACE_2 for: $(date -d @$curr_date '+%F (%A)')"
-        echo "$(date): Checking PLACE_2 for: $(date -d @$curr_date '+%F (%A)')" >> ./script.log
+        echo "$(date): Checking PLACE_2 for: $(date -d @$curr_date '+%F (%A)')"
+        echo "$(date): Checking PLACE_2 for: $(date -d @$curr_date '+%F (%A)')" >> $SCRIPT_DIR/script.log
 
         # Execute the curl command and process the output
         result=$(curl -skb $cookie_name=$cookie $url2 |
@@ -110,10 +114,10 @@ for curr_date in "${dates[@]}"; do
 
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
-            echo "Found!"
-            echo "$(date): Found!" >> ./script.log
-            echo "PLACE_2: $result"
-            echo "$(date): PLACE_2: $result" >> ./script.log
+            echo "$(date): Found!"
+            echo "$(date): Found!" >> $SCRIPT_DIR/script.log
+            echo "$(date): PLACE_2: $result"
+            echo "$(date): PLACE_2: $result" >> $SCRIPT_DIR/script.log
             concatenated_result+=("$PLACE_2: $result ")
         fi
     fi
@@ -126,23 +130,24 @@ for i in "${concatenated_result[@]}"; do
 done
 
 # Read the value of previous_result from the file
-previous_result=$(cat previous_result.txt)
+previous_result=$(cat $SCRIPT_DIR/previous_result.txt)
 
 # print whether prev is equal to cur or not
 echo
 
 # Check if the current result is the same as the previous result or if the current result is only "Available slots:\n"
 if [ "$formatted_result" == "Available slots:\n" ] || [ "$formatted_result" == "$previous_result" ]; then
-    echo "No change or empty result detected"
-    echo "$(date): No change or empty result detected" >> ./script.log
+    echo "$(date): No change or empty result detected"
+    echo "$(date): No change or empty result detected" >> $SCRIPT_DIR/script.log
 else
-    echo "Change detected"
-    echo "$(date): Change detected: $formatted_result" >> ./script.log
+    echo "$(date): Change detected"
+    echo "$(date): Change detected: $formatted_result" >> $SCRIPT_DIR/script.log
 
     # Send the email
     sendemail -f "$EMAIL" -t "$TO" -u "$SUBJECT" -m "$formatted_result \n\n$url_1\n\n$url_2" -s "$SMTP_SERVER:$SMTP_PORT" -xu "$EMAIL" -xp "$PASSWORD" -o tls=$SSL
 fi
 
 # Store the value of previous_result in a file
-echo "$formatted_result" >previous_result.txt
-echo "$(date): Script completed" >> ./script.log
+echo "$formatted_result" > $SCRIPT_DIR/previous_result.txt
+echo "$(date): Script completed" 
+echo "$(date): Script completed" >> $SCRIPT_DIR/script.log
