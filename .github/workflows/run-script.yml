@@ -7,9 +7,9 @@ on:
 
 env:
   PARAM_COOKIE: ${{ secrets.SECRET_COOKIE }}
-  PARAM_PLACE: ${{ env.VAR_PLACE }}
-  PARAM_DATE: ${{ env.VAR_DATE }}
-  PARAM_HOURS: ${{ env.VAR_HOURS }}
+  PARAM_PLACE: ${{ vars.VAR_PLACE }}
+  PARAM_DATE: ${{ vars.VAR_DATE }}
+  PARAM_HOURS: ${{ vars.VAR_HOURS }}
 
 jobs:
   run_script:
