@@ -69,7 +69,7 @@ PLACE_2)
     url="${CONST_URL_PLACE_2}${curr_date}"
     ;;
 *)
-    log_with_date "Invalid place specified."
+    log_with_date "Invalid place specified: $place"
     exit 1
     ;;
 esac
