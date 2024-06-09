@@ -15,7 +15,7 @@ jobs:
       - name: Run Bash Script
         env:
           PARAM_COOKIE: ${{ secrets.SECRET_COOKIE }}
-          PARAM_PLACE: ${{ secrets.SECRET_PLACE }}
+          PARAM_PLACE: ${{ secrets.VAR_PLACE }}
           PARAM_DATE: ${{ secrets.VAR_DATE }}
           PARAM_HOURS: ${{ secrets.VAR_HOURS }}
         run: ./get_available_slots.sh "${PARAM_COOKIE}" "${PARAM_PLACE}" "${PARAM_DATE}" "${PARAM_HOURS}"
