@@ -74,7 +74,7 @@ EOF
 )
 
 # Send the PUT request
-response=$(curl -X PUT "$CONST_RESERVATION_URL/$group_id" \
+response=$(curl -sX PUT "$CONST_RESERVATION_URL/$group_id" \
   -H "Content-Type: application/json" \
   -H "Cookie: $cookie_value" \
   -d "$jsonBody")

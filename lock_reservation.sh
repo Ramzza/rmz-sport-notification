@@ -80,7 +80,7 @@ EOF
 log_with_date "request body: $jsonBody"
 
 # Send the request
-response=$(curl -X POST "$CONST_RESERVATION_URL" \
+response=$(curl -sX POST "$CONST_RESERVATION_URL" \
   -H "Content-Type: application/json" \
   -H "Cookie: $cookie" \
   -d "$jsonBody")
