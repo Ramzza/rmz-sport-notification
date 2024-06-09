@@ -1,17 +1,16 @@
 #!/bin/bash
 
-echo "$(date): Script started" 
+log_file="main.log"
 
-# Determine the directory where the script is located
-SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-echo "$(date): Script started" >> $SCRIPT_DIR/script.log
+# Function to prepend current date and time to log messages
+log_with_date() {
+    echo "$(date) - R: $1" | tee -a $log_file
+}
+
+log_with_date "Script started"
 
 # Specify the path to your.env file relative to the script directory
-ENV_FILE="$SCRIPT_DIR/.env"
-
-# Initialize the start date to today
-start_date=$(date +%s)
-dates=()
+ENV_FILE=".env"
 
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
@@ -35,6 +34,10 @@ if [ -f "$ENV_FILE" ]; then
         eval "$key='$value'"
     done <"$ENV_FILE"
 fi
+
+# Initialize the start date to today
+start_date=$(date +%s)
+dates=()
 
 # Loop for the next 14 days
 for i in $(seq 0 14); do
@@ -74,28 +77,20 @@ for curr_date in "${dates[@]}"; do
         two_weeks_later=true
     fi
 
-    url1="${const_url1}${curr_date}${param}"
-    url2="${const_url2}${curr_date}${param}"
-
     # if curr_date is in this week or next week then check for available slots in G
-    if [[ $this_week == true || $next_week == true ]]; then
+    if [[ $this_week == $CONST_CHECK_WEEK_THIS || $next_week == $CONST_CHECK_WEEK_NEXT || $two_weeks_later == $CONST_CHECK_WEEK_TWO ]]; then
 
-        echo "$(date): Checking PLACE_1 for: $(date -d @$curr_date '+%F (%A)')"
-        echo "$(date): Checking PLACE_1 for: $(date -d @$curr_date '+%F (%A)')" >> $SCRIPT_DIR/script.log
-        
+        log_with_date "Checking PLACE_1 for: $(date -d @$curr_date '+%F (%A)')"
+
         # Execute the curl command and process the output
-        result=$(curl -skb $cookie_name=$cookie $url1 |
-            grep -o '"time":[0-9]*' |
-            grep -o '[0-9]*' |
-            xargs -I {} date -d @{} |
+        result=$(curl -skb client_session=$CONST_COOKIE "${CONST_URL_PLACE_1}${curr_date}" |
+            jq -r '.available_slots[] | select(.is_available == 1) | "\(.time | tonumber | . + 10800 | todate) \(.staff_id)"' |
             grep -E "(${convenient_hours}):")
 
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
-            echo "$(date): Found!"
-            echo "$(date): Found!" >> $SCRIPT_DIR/script.log
-            echo "$(date): PLACE_1: $result"
-            echo "$(date): PLACE_1: $result" >> $SCRIPT_DIR/script.log
+            log_with_date "Found!"
+            log_with_date "PLACE_1: $result"
             concatenated_result+=("$PLACE_1: $result ")
         fi
     fi
@@ -103,22 +98,17 @@ for curr_date in "${dates[@]}"; do
     # if curr_date is in this week or in 2 weeks then check for available slots in M
     if [[ true ]]; then
 
-        echo "$(date): Checking PLACE_2 for: $(date -d @$curr_date '+%F (%A)')"
-        echo "$(date): Checking PLACE_2 for: $(date -d @$curr_date '+%F (%A)')" >> $SCRIPT_DIR/script.log
+        log_with_date "Checking PLACE_2 for: $(date -d @$curr_date '+%F (%A)')"
 
         # Execute the curl command and process the output
-        result=$(curl -skb $cookie_name=$cookie $url2 |
-            grep -o '"time":[0-9]*' |
-            grep -o '[0-9]*' |
-            xargs -I {} date -d @{} |
+        result=$(curl -skb client_session=$CONST_COOKIE "${CONST_URL_PLACE_2}${curr_date}" |
+            jq -r '.available_slots[] | select(.is_available == 1) | "\(.time | tonumber | . + 10800 | todate) \(.staff_id)"' |
             grep -E "(${convenient_hours}):")
 
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
-            echo "$(date): Found!"
-            echo "$(date): Found!" >> $SCRIPT_DIR/script.log
-            echo "$(date): PLACE_2: $result"
-            echo "$(date): PLACE_2: $result" >> $SCRIPT_DIR/script.log
+            log_with_date "Found!"
+            log_with_date "PLACE_2: $result"
             concatenated_result+=("$PLACE_2: $result ")
         fi
     fi
@@ -138,18 +128,15 @@ echo
 
 # Check if the current result is the same as the previous result or if the current result is only "Available slots:\n"
 if [ "$formatted_result" == "Available slots:\n" ] || [ "$formatted_result" == "$previous_result" ]; then
-    echo "$(date): No change or empty result detected"
-    echo "$(date): No change or empty result detected" >> $SCRIPT_DIR/script.log
+    log_with_date "No change or empty result detected"
 else
-    echo "$(date): Change detected"
-    echo "$(date): Change detected: $formatted_result" >> $SCRIPT_DIR/script.log
-    $SCRIPT_DIR/wsl-notify-send.exe "$formatted_result"
+    log_with_date "Change detected: $formatted_result"
+    # ./wsl-notify-send.exe "$formatted_result"
 
     # Send the email
-    sendemail -f "$EMAIL" -t "$TO" -u "$SUBJECT" -m "$formatted_result \n\n$url_1\n\n$url_2" -s "$SMTP_SERVER:$SMTP_PORT" -xu "$EMAIL" -xp "$PASSWORD" -o tls=$SSL
+    # sendemail -f "$EMAIL" -t "$TO" -u "$SUBJECT" -m "$formatted_result \n\n$url_1\n\n$url_2" -s "$SMTP_SERVER:$SMTP_PORT" -xu "$EMAIL" -xp "$PASSWORD" -o tls=$SSL
 fi
 
 # Store the value of previous_result in a file
-echo "$formatted_result" > $SCRIPT_DIR/previous_result.txt
-echo "$(date): Script completed" 
-echo "$(date): Script completed" >> $SCRIPT_DIR/script.log
+echo "$formatted_result" >./previous_result.txt
+log_with_date "Script completed"
