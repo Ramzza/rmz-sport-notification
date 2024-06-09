@@ -13,5 +13,10 @@ jobs:
         uses: actions/checkout@v2
       
       - name: Run Bash Script
-        run: ./get_available_slots.sh
+        env:
+          PARAM_COOKIE: ${{ secrets.SECRET_COOKIE }}
+          PARAM_PLACE: ${{ secrets.SECRET_PLACE }}
+          PARAM_DATE: ${{ secrets.SECRET_DATE }}
+          PARAM_HOURS: ${{ secrets.SECRET_HOURS }}
+        run: ./get_available_slots.sh "${PARAM_COOKIE}" "${PARAM_PLACE}" "${PARAM_DATE}" "${PARAM_HOURS}"
         shell: bash
