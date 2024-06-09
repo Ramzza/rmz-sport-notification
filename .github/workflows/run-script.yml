@@ -1,6 +1,7 @@
 name: Run Bash Script Every 5 Minutes
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '*/5 * * * *'
 
