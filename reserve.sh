@@ -56,18 +56,23 @@ fi
 if [ $# -eq 6 ]; then
     # If both date and time are provided
     given_date=$5
-    next_hour=$6
+    selected_hour=$6
 else
     # If neither date nor time are provided, calculate defaults
     given_date=$(date -d "2 weeks" +%Y-%m-%d)
-    next_hour=$(date -d "next hour" +%H:00)
+    current_minute=$(date +%M)
+    if [ "$current_minute" -lt 45 ]; then
+        selected_hour=$(date +%H:00)
+    else
+        selected_hour=$(date -d "next hour" +%H:00)
+    fi
 fi
 
 log_with_date "Given date: $given_date"
-log_with_date "Next hour: $next_hour"
+log_with_date "Selected hour: $selected_hour"
 
 # Call lock_reservation.sh with the calculated date, time, and the additional parameters
-lock_result=$(./lock_reservation.sh "$given_date" "$next_hour" "$cookie" "$location_id" "$service_id" "$staff_id")
+lock_result=$(./lock_reservation.sh "$given_date" "$selected_hour" "$cookie" "$location_id" "$service_id" "$staff_id")
 lock_result=$(echo "$lock_result" | tail -n 1)
 log_with_date "Reservation locked: $lock_result"
 
