@@ -2,7 +2,7 @@ name: Run Bash Script Every 5 Minutes
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '54-59,0-5 8-21 * * *'
 
 jobs:
   run_script:
@@ -12,5 +12,5 @@ jobs:
         uses: actions/checkout@v2
       
       - name: Run Bash Script
-        run: ./main.sh
+        run: ./get_available_slots.sh
         shell: bash

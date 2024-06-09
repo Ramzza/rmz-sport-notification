@@ -57,9 +57,6 @@ else
     convenient_hours=$CONST_CONVENIENT_HOURS # Use environment variable or default
 fi
 
-# Define constants for URLs and other parameters
-SCRIPT_DIR=$(dirname "$0") # Assuming the script.log is in the same directory as the script
-
 # Convert the given date to a timestamp
 curr_date=$(date -d "$given_date" +%s)
 
