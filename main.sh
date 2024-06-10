@@ -45,7 +45,15 @@ dates=()
 for i in $(seq 0 14); do
     # Calculate the Unix timestamp for the next day
     next_day_timestamp=$((start_date + i * 86400))
-    dates+=($next_day_timestamp)
+
+    # Convert Unix timestamp to a day of the week (e.g., Mon)
+    day_of_week=$(date -d @$next_day_timestamp +%a)
+
+    # Check if the day of the week is in the list of days to skip
+    if [[ ! $CONST_DAYS_TO_SKIP =~ $day_of_week ]]; then
+        # If not in skip list, add the date to the dates array
+        dates+=($next_day_timestamp)
+    fi
 done
 
 # Loop through each URL
