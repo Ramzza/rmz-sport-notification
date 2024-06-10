@@ -1,16 +1,11 @@
 #!/bin/bash
 
-log_file="main.log"
-
-# Function to prepend current date and time to log messages
-log_with_date() {
-    echo "$(date) - R: $1" | tee -a $log_file
-}
-
-log_with_date "Script started"
+# Determine the directory where the script is located
+SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Specify the path to your.env file relative to the script directory
-ENV_FILE=".env"
+ENV_FILE="$SCRIPT_DIR/.env"
+log_file="$SCRIPT_DIR/main.log"
 
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
@@ -34,6 +29,13 @@ if [ -f "$ENV_FILE" ]; then
         eval "$key='$value'"
     done <"$ENV_FILE"
 fi
+
+# Function to prepend current date and time to log messages
+log_with_date() {
+    echo "$(date) - R: $1" | tee -a $log_file
+}
+
+log_with_date "Script started"
 
 # Initialize the start date to today
 start_date=$(date +%s)
@@ -78,14 +80,14 @@ for curr_date in "${dates[@]}"; do
     fi
 
     # if curr_date is in this week or next week then check for available slots in G
-    if [[ $this_week == $CONST_CHECK_WEEK_THIS || $next_week == $CONST_CHECK_WEEK_NEXT || $two_weeks_later == $CONST_CHECK_WEEK_TWO ]]; then
+    if [[ "$this_week" == "true" && "$CONST_CHECK_WEEK_THIS_PLACE_1" == "true" ]] || [[ "$next_week" == "true" && "$CONST_CHECK_WEEK_NEXT_PLACE_1" == "true" ]] || [[ "$two_weeks_later" == "true" && "$CONST_CHECK_WEEK_TWO_PLACE_1" == "true" ]]; then
 
         log_with_date "Checking PLACE_1 for: $(date -d @$curr_date '+%F (%A)')"
 
         # Execute the curl command and process the output
         result=$(curl -skb client_session=$CONST_COOKIE "${CONST_URL_PLACE_1}${curr_date}" |
             jq -r '.available_slots[] | select(.is_available == 1) | "\(.time | tonumber | . + 10800 | todate) \(.staff_id)"' |
-            grep -E "(${convenient_hours}):")
+            grep -E "(${CONST_CONVENIENT_HOURS}):")
 
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
@@ -96,19 +98,18 @@ for curr_date in "${dates[@]}"; do
     fi
 
     # if curr_date is in this week or in 2 weeks then check for available slots in M
-    if [[ true ]]; then
+    if [[ "$this_week" == "true" && "$CONST_CHECK_WEEK_THIS_PLACE_2" == "true" ]] || [[ "$next_week" == "true" && "$CONST_CHECK_WEEK_NEXT_PLACE_2" == "true" ]] || [[ "$two_weeks_later" == "true" && "$CONST_CHECK_WEEK_TWO_PLACE_2" == "true" ]]; then
 
         log_with_date "Checking PLACE_2 for: $(date -d @$curr_date '+%F (%A)')"
 
         # Execute the curl command and process the output
         result=$(curl -skb client_session=$CONST_COOKIE "${CONST_URL_PLACE_2}${curr_date}" |
             jq -r '.available_slots[] | select(.is_available == 1) | "\(.time | tonumber | . + 10800 | todate) \(.staff_id)"' |
-            grep -E "(${convenient_hours}):")
+            grep -E "(${CONST_CONVENIENT_HOURS}):")
 
         # Concatenate the result to a variable
         if [ -n "$result" ]; then
-            log_with_date "Found!"
-            log_with_date "PLACE_2: $result"
+            log_with_date "Found! PLACE_2: $result"
             concatenated_result+=("$PLACE_2: $result ")
         fi
     fi
@@ -134,9 +135,9 @@ else
     # ./wsl-notify-send.exe "$formatted_result"
 
     # Send the email
-    # sendemail -f "$EMAIL" -t "$TO" -u "$SUBJECT" -m "$formatted_result \n\n$url_1\n\n$url_2" -s "$SMTP_SERVER:$SMTP_PORT" -xu "$EMAIL" -xp "$PASSWORD" -o tls=$SSL
+    sendemail -f "$EMAIL" -t "$TO" -u "$SUBJECT" -m "$formatted_result \n\n$url_1\n\n$url_2" -s "$SMTP_SERVER:$SMTP_PORT" -xu "$EMAIL" -xp "$PASSWORD" -o tls=$SSL
 fi
 
 # Store the value of previous_result in a file
-echo "$formatted_result" >./previous_result.txt
+echo "$formatted_result" >$SCRIPT_DIR/previous_result.txt
 log_with_date "Script completed"

@@ -1,7 +1,11 @@
 #!/bin/bash
 
+# Determine the directory where the script is located
+SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Specify the path to your.env file relative to the script directory
-ENV_FILE=".env"
+ENV_FILE="$SCRIPT_DIR/.env"
+log_file="$SCRIPT_DIR/lock_reservation.log"
 
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
@@ -25,9 +29,6 @@ if [ -f "$ENV_FILE" ]; then
     eval "$key='$value'"
   done <"$ENV_FILE"
 fi
-
-# Define log file
-log_file="lock_reservation.log"
 
 # Function to prepend current date and time to log messages
 log_with_date() {

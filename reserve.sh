@@ -1,9 +1,11 @@
 #!/bin/bash
 
-log_file="reserve.log"
+# Determine the directory where the script is located
+SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Specify the path to your.env file relative to the script directory
-ENV_FILE=".env"
+ENV_FILE="$SCRIPT_DIR/.env"
+log_file="$SCRIPT_DIR/reserve.log"
 
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
@@ -78,7 +80,7 @@ log_with_date "Reservation locked: $lock_result"
 
 # Check if lock_reservation.sh executed successfully
 if ! [[ "$lock_result" =~ ^-?[0-9]+$ ]]; then
-    echo "Error: lock_result is not an integer."
+    log_with_date "Error: lock_result is not an integer."
     exit 1
 elif [ "$lock_result" -ne 0 ]; then
     # If successful, pass the result and additional parameters to finalize_reservation

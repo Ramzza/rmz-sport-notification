@@ -1,7 +1,10 @@
 #!/bin/bash
 
+# Determine the directory where the script is located
+SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Specify the path to your.env file relative to the script directory
-ENV_FILE=".env"
+ENV_FILE="$SCRIPT_DIR/.env"
 
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
