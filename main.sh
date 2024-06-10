@@ -136,8 +136,10 @@ previous_result=$(cat $SCRIPT_DIR/previous_result.txt)
 echo
 
 # Check if the current result is the same as the previous result or if the current result is only "Available slots:\n"
-if [ "$formatted_result" == "Available slots:\n" ] || [ "$formatted_result" == "$previous_result" ]; then
-    log_with_date "No change or empty result detected"
+if [ "$formatted_result" == "$previous_result" ]; then
+    log_with_date "No change detected - $formatted_result"
+elif [ "$formatted_result" == "Available slots:\n" ]; then
+    log_with_date "Empty result detected"
 else
     log_with_date "Change detected: $formatted_result"
     # ./wsl-notify-send.exe "$formatted_result"

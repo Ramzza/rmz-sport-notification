@@ -18,13 +18,19 @@ while [[ "$#" -gt 0 ]]; do
         cookie="$2"
         shift
         ;;
-    --location_id)
-        location_id="$2"
+    --location)
+        location="$2"
         shift
-        ;;
-    --service_id)
-        service_id="$2"
-        shift
+        if [[ "$location" == "MON" ]]; then
+            location_id="4609"
+            service_id="37695"
+        elif [[ "$location" == "GHE" ]]; then
+            location_id="1651"
+            service_id="8029"
+        else
+            echo "Invalid location. Please specify MON or GHE."
+            exit 1
+        fi
         ;;
     --date)
         date="$2"
@@ -43,9 +49,14 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Check if the required arguments are provided
-if [ -z "$cookie" ] || [ -z "$location_id" ] || [ -z "$service_id" ] || [ -z "$date" ]; then
-    log_with_date "Usage: $0 --cookie <cookie> --location_id <location_id> --service_id <service_id> --date <YYYY-MM-DD> [--time <HH:MM>]"
+if [ -z "$cookie" ] || [ -z "$location" ]; then
+    log_with_date "Usage: $0 --cookie <cookie> --location <MON|GHE> --date <YYYY-MM-DD> [--time <HH:MM>]"
     exit 1
+fi
+
+# Set default date to two weeks from now if not provided
+if [ -z "$date" ]; then
+    date=$(date -d "+2 weeks" +%Y-%m-%d)
 fi
 
 # Invoke get_available_slots.sh with the necessary parameters
@@ -62,5 +73,5 @@ if [[ "$staff_id" =~ ^[0-9]+$ ]] && ((staff_id > 0)); then
     # Note: Adjust the path to reserve.sh as necessary
     ./reserve.sh "$cookie" "$location_id" "$service_id" "$staff_id" "$date" "$time"
 else
-    log_with_date "No matching slots found for the specified date and time."
+    log_with_date "No matching slots found for location $location_id at $date $time."
 fi
