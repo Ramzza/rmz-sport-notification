@@ -4,7 +4,31 @@
 SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Specify the path to your .env file relative to the script directory
+ENV_FILE="$SCRIPT_DIR/.env"
 log_file="$SCRIPT_DIR/targeted_reservation.log"
+
+# Check if the.env file exists
+if [ -f "$ENV_FILE" ]; then
+
+    # Read the.env file line by line
+    while IFS= read -r line; do
+
+        # Skip comments and empty lines
+        if [[ "$line" =~ ^\s*#.*$ || -z "$line" ]]; then
+            continue
+        fi
+
+        # Split the line into key and value
+        key=$(echo "$line" | cut -d '=' -f 1)
+        value=$(echo "$line" | cut -d '=' -f 2-)
+
+        # Remove single quotes, double quotes, and leading/trailing spaces from the value
+        value=$(echo "$value" | sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' -e 's/^[ \t]*//;s/[ \t]*$//')
+
+        # Assign the key and value as local variables
+        eval "$key='$value'"
+    done <"$ENV_FILE"
+fi
 
 # Function to prepend current date and time to log messages
 log_with_date() {
@@ -47,6 +71,16 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
+
+# After the parameter parsing loop
+if [ -z "$cookie" ]; then
+    if [ -z "$CONST_COOKIE" ]; then
+        echo "Cookie is required. Please provide a cookie or set CONST_COOKIE."
+        exit 1
+    else
+        cookie="$CONST_COOKIE"
+    fi
+fi
 
 # Check if the required arguments are provided
 if [ -z "$cookie" ] || [ -z "$location" ]; then
