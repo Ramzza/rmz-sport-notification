@@ -73,5 +73,5 @@ if [[ "$staff_id" =~ ^[0-9]+$ ]] && ((staff_id > 0)); then
     # Note: Adjust the path to reserve.sh as necessary
     ./reserve.sh "$cookie" "$location_id" "$service_id" "$staff_id" "$date" "$time"
 else
-    log_with_date "No matching slots found for location $location_id at $date $time."
+    log_with_date "No matching slots found for location $location at $date $time."
 fi
