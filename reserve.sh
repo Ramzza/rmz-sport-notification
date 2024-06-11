@@ -74,7 +74,7 @@ log_with_date "Given date: $given_date"
 log_with_date "Selected hour: $selected_hour"
 
 # Call lock_reservation.sh with the calculated date, time, and the additional parameters
-lock_result=$(./lock_reservation.sh "$given_date" "$selected_hour" "$cookie" "$location_id" "$service_id" "$staff_id")
+lock_result=$("$SCRIPT_DIR/lock_reservation.sh" "$given_date" "$selected_hour" "$cookie" "$location_id" "$service_id" "$staff_id")
 lock_result=$(echo "$lock_result" | tail -n 1)
 log_with_date "Reservation locked: $lock_result"
 
@@ -84,7 +84,7 @@ if ! [[ "$lock_result" =~ ^-?[0-9]+$ ]]; then
     exit 1
 elif [ "$lock_result" -ne 0 ]; then
     # If successful, pass the result and additional parameters to finalize_reservation
-    finalize_result=$(./finalize_reservation.sh "$cookie" "$lock_result")
+    finalize_result=$("$SCRIPT_DIR/finalize_reservation.sh" "$cookie" "$lock_result")
     log_with_date "Reservation finalized: $finalize_result"
 else
     log_with_date "Failed to lock reservation."

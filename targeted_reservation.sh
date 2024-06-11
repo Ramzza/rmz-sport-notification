@@ -95,7 +95,7 @@ fi
 
 # Invoke get_available_slots.sh with the necessary parameters
 # Note: Adjust the path to get_available_slots.sh as necessary
-output=$(./get_available_slots.sh --cookie "$cookie" --location_id "$location_id" --service_id "$service_id" --date "$date" --convenient_hours "$time")
+output=$("$SCRIPT_DIR/get_available_slots.sh" --cookie "$cookie" --location_id "$location_id" --service_id "$service_id" --date "$date" --convenient_hours "$time")
 staff_id=$(echo "$output" | grep -oE '[0-9]+$' | tail -n1)
 
 # Parse the output to find a matching slot
@@ -105,7 +105,7 @@ if [[ "$staff_id" =~ ^[0-9]+$ ]] && ((staff_id > 0)); then
 
     # Call reserve.sh with the necessary parameters
     # Note: Adjust the path to reserve.sh as necessary
-    ./reserve.sh "$cookie" "$location_id" "$service_id" "$staff_id" "$date" "$time"
+    "$SCRIPT_DIR/reserve.sh" "$cookie" "$location_id" "$service_id" "$staff_id" "$date" "$time"
 else
     log_with_date "No matching slots found for location $location at $date $time."
 fi
