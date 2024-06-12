@@ -46,11 +46,11 @@ while [[ "$#" -gt 0 ]]; do
         location="$2"
         shift
         if [[ "$location" == "MON" ]]; then
-            location_id="4609"
-            service_id="37695"
+            location_id="$CONST_LOCATION_1"
+            service_id="$CONST_SPORT_1"
         elif [[ "$location" == "GHE" ]]; then
-            location_id="1651"
-            service_id="8029"
+            location_id="$CONST_LOCATION_2"
+            service_id="$CONST_SPORT_2"
         else
             echo "Invalid location. Please specify MON or GHE."
             exit 1
