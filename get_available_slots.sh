@@ -5,7 +5,7 @@ SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Specify the path to your .env file relative to the script directory
 ENV_FILE="$SCRIPT_DIR/.env"
-log_file="$SCRIPT_DIR/get_available_slots.log"
+log_file="$SCRIPT_DIR/$(basename "$0" .sh).log"
 
 # Default values for optional parameters
 staff_id=""
