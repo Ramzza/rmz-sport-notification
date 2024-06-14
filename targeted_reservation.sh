@@ -52,7 +52,7 @@ while [[ "$#" -gt 0 ]]; do
             location_id="$CONST_LOCATION_2"
             service_id="$CONST_SPORT_2"
         else
-            echo "Invalid location. Please specify MON or GHE."
+            log_with_date "Invalid location. Please specify MON or GHE."
             exit 1
         fi
         ;;
@@ -65,7 +65,7 @@ while [[ "$#" -gt 0 ]]; do
         shift
         ;;
     *)
-        echo "Unknown parameter passed: $1"
+        log_with_date "Unknown parameter passed: $1"
         exit 1
         ;;
     esac
@@ -75,7 +75,7 @@ done
 # After the parameter parsing loop
 if [ -z "$cookie" ]; then
     if [ -z "$CONST_COOKIE" ]; then
-        echo "Cookie is required. Please provide a cookie or set CONST_COOKIE."
+        log_with_date "Cookie is required. Please provide a cookie or set CONST_COOKIE."
         exit 1
     else
         cookie="$CONST_COOKIE"
