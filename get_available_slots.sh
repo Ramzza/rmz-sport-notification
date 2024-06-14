@@ -7,6 +7,11 @@ SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$SCRIPT_DIR/.env"
 log_file="$SCRIPT_DIR/$(basename "$0" .sh).log"
 
+# Function to prepend current date and time to log messages
+log_with_date() {
+    echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
+}
+
 # Default values for optional parameters
 staff_id=""
 convenient_hours=""
@@ -39,7 +44,7 @@ while [[ "$#" -gt 0 ]]; do
         shift
         ;;
     *)
-        echo "Unknown parameter passed: $1"
+        log_with_date "Unknown parameter passed: $1"
         exit 1
         ;;
     esac
@@ -48,7 +53,7 @@ done
 
 # Check if the required arguments are provided
 if [ -z "$cookie" ] || [ -z "$location_id" ] || [ -z "$service_id" ]; then
-    echo "Usage: $0 --cookie <cookie> --location_id <location_id> --service_id <service_id> [--staff_id <staff_id>] [--date <YYYY-MM-DD>] [--convenient_hours <hours>]"
+    log_with_date "Usage: $0 --cookie <cookie> --location_id <location_id> --service_id <service_id> [--staff_id <staff_id>] [--date <YYYY-MM-DD>] [--convenient_hours <hours>]"
     exit 1
 fi
 
@@ -64,11 +69,6 @@ if [ -f "$ENV_FILE" ]; then
         eval "$key='$value'"
     done <"$ENV_FILE"
 fi
-
-# Function to prepend current date and time to log messages
-log_with_date() {
-    echo "$(date) - R: $1" | tee -a $log_file
-}
 
 # If a date is not provided, calculate the date for two weeks from now
 if [ -z "$given_date" ]; then
@@ -102,3 +102,5 @@ if [ -n "$result" ]; then
 else
     log_with_date "No available slots found"
 fi
+
+log_with_date "script finished"

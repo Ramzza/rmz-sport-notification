@@ -7,6 +7,13 @@ SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$SCRIPT_DIR/.env"
 log_file="$SCRIPT_DIR/$(basename "$0" .sh).log"
 
+# Function to prepend current date and time to log messages
+log_with_date() {
+    echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
+}
+
+log_with_date "script started"
+
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
 
@@ -29,13 +36,6 @@ if [ -f "$ENV_FILE" ]; then
         eval "$key='$value'"
     done <"$ENV_FILE"
 fi
-
-# Function to prepend current date and time to log messages
-log_with_date() {
-    echo "$(date) - R: $1" | tee -a $log_file
-}
-
-log_with_date "Script started"
 
 # Initialize the start date to today
 start_date=$(date +%s)
@@ -132,9 +132,6 @@ done
 # Read the value of previous_result from the file
 previous_result=$(cat $SCRIPT_DIR/previous_result.txt)
 
-# print whether prev is equal to cur or not
-echo
-
 # Check if the current result is the same as the previous result or if the current result is only "Available slots:\n"
 if [ "$formatted_result" == "$previous_result" ]; then
     log_with_date "No change detected - $formatted_result"
@@ -150,4 +147,5 @@ fi
 
 # Store the value of previous_result in a file
 echo "$formatted_result" >$SCRIPT_DIR/previous_result.txt
-log_with_date "Script completed"
+
+log_with_date "script finished"

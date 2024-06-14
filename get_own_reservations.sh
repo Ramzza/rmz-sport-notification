@@ -9,10 +9,10 @@ log_file="$SCRIPT_DIR/$(basename "$0" .sh).log"
 
 # Function to prepend current date and time to log messages
 log_with_date() {
-    echo "$(date) - R: $1" | tee -a $log_file
+    echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
 }
 
-log_with_date "$(basename "$0") script started"
+log_with_date "script started"
 
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
@@ -54,4 +54,4 @@ fi
 # Execute the GET request with the provided cookie and return the result
 curl -s -H "cookie: client_session=$cookie_value" "$CONST_URL_OWN_RESERVATION" | jq -r '.appointments[] | "\(.appointment_date) \(.appointment_time) \(.business_name)"'
 
-log_with_date "$(basename "$0") script finished"
+log_with_date "script finished"

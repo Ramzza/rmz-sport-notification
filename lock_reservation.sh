@@ -7,6 +7,13 @@ SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$SCRIPT_DIR/.env"
 log_file="$SCRIPT_DIR/$(basename "$0" .sh).log"
 
+# Function to prepend current date and time to log messages
+log_with_date() {
+  echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
+}
+
+log_with_date "script started"
+
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
 
@@ -29,11 +36,6 @@ if [ -f "$ENV_FILE" ]; then
     eval "$key='$value'"
   done <"$ENV_FILE"
 fi
-
-# Function to prepend current date and time to log messages
-log_with_date() {
-  echo "$(date) - R: $1" | tee -a $log_file
-}
 
 # Check if all required arguments are provided
 if [ $# -ne 6 ]; then
@@ -93,7 +95,6 @@ log_with_date "response: $response"
 success=$(echo $response | jq -r '.success')
 if [ "$success" -eq 0 ]; then
   log_with_date "Operation failed, success: $success"
-  echo 0 | tee -a $log_file
   exit 1
 fi
 
@@ -102,10 +103,11 @@ appointment_group_id=$(echo $response | jq -r '.appointment_group_id')
 
 # Check if appointment_group_id is valid and return it, otherwise return 0
 if [[ $appointment_group_id =~ ^[0-9]+$ ]]; then
-  echo $appointment_group_id | tee -a $log_file
+  log_with_date "$appointment_group_id"
   exit 0
 else
   log_with_date "Invalid appointment_group_id"
-  echo 0 | tee -a $log_file
   exit 1
 fi
+
+log_with_date "script finished"

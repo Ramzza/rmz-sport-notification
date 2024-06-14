@@ -7,6 +7,11 @@ SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$SCRIPT_DIR/.env"
 log_file="$SCRIPT_DIR/$(basename "$0" .sh).log"
 
+# Function to log messages with date and time
+log_with_date() {
+  echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
+}
+
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
 
@@ -29,11 +34,6 @@ if [ -f "$ENV_FILE" ]; then
     eval "$key='$value'"
   done <"$ENV_FILE"
 fi
-
-# Function to log messages with date and time
-log_with_date() {
-  echo "$(date) - FR: $1" | tee -a $log_file
-}
 
 # Check if the correct number of arguments was provided
 if [ $# -ne 2 ]; then
@@ -82,3 +82,5 @@ response=$(curl -sX PUT "$CONST_RESERVATION_URL/$group_id" \
 
 # Optionally, log the response with date and time
 log_with_date "$response"
+
+log_with_date "script finished"
