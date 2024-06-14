@@ -45,10 +45,10 @@ while [[ "$#" -gt 0 ]]; do
     --location)
         location="$2"
         shift
-        if [[ "$location" == "MON" ]]; then
+        if [[ "$location" == "GHE" ]]; then
             location_id="$CONST_LOCATION_1"
             service_id="$CONST_SPORT_1"
-        elif [[ "$location" == "GHE" ]]; then
+        elif [[ "$location" == "MON" ]]; then
             location_id="$CONST_LOCATION_2"
             service_id="$CONST_SPORT_2"
         else
