@@ -103,7 +103,8 @@ appointment_group_id=$(echo $response | jq -r '.appointment_group_id')
 
 # Check if appointment_group_id is valid and return it, otherwise return 0
 if [[ $appointment_group_id =~ ^[0-9]+$ ]]; then
-  log_with_date "$appointment_group_id"
+  log_with_date "appointment_group_id: $appointment_group_id"
+  echo $appointment_group_id
   exit 0
 else
   log_with_date "Invalid appointment_group_id"
