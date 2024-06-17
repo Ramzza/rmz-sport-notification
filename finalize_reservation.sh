@@ -12,6 +12,8 @@ log_with_date() {
   echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
 }
 
+log_with_date "Script started"
+
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
 
@@ -44,13 +46,10 @@ fi
 # The first argument is the cookie value, and the second is the group ID
 cookie_value="client_session=$1"
 group_id="$2"
-log_with_date "Cookie Value: $cookie_value"
-log_with_date "Group ID: $group_id"
 
 # Validate the group ID
 if [[ ! -z "$group_id" ]] && [[ "$group_id" =~ ^[0-9]+$ ]]; then
   log_with_date "Appointment Group ID: $group_id"
-  log_with_date "Appointment Group ID is valid"
 else
   log_with_date "Appointment Group ID is invalid"
   exit 1
@@ -83,4 +82,4 @@ response=$(curl -sX PUT "$CONST_RESERVATION_URL/$group_id" \
 # Optionally, log the response with date and time
 log_with_date "$response"
 
-log_with_date "script finished"
+log_with_date "Script finished"

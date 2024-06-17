@@ -7,6 +7,13 @@ SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$SCRIPT_DIR/.env"
 log_file="$SCRIPT_DIR/$(basename "$0" .sh).log"
 
+# Function to prepend current date and time to log messages
+log_with_date() {
+    echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
+}
+
+log_with_date "Script started"
+
 # Load environment variables from .env file
 if [ -f "$ENV_FILE" ]; then
     while IFS= read -r line; do
@@ -19,11 +26,6 @@ if [ -f "$ENV_FILE" ]; then
         eval "$key='$value'"
     done <"$ENV_FILE"
 fi
-
-# Function to prepend current date and time to log messages
-log_with_date() {
-    echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
-}
 
 # Default values for optional parameters
 staff_id=""
@@ -112,4 +114,4 @@ else
     log_with_date "No available slots found"
 fi
 
-log_with_date "script finished"
+log_with_date "Script finished"

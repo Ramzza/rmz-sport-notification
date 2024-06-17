@@ -12,7 +12,7 @@ log_with_date() {
   echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
 }
 
-log_with_date "script started"
+log_with_date "Script started"
 
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
@@ -111,4 +111,4 @@ else
   exit 1
 fi
 
-log_with_date "script finished"
+log_with_date "Script finished"

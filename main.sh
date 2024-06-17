@@ -12,7 +12,7 @@ log_with_date() {
     echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
 }
 
-log_with_date "script started"
+log_with_date "Script started"
 
 # Check if the.env file exists
 if [ -f "$ENV_FILE" ]; then
@@ -148,4 +148,4 @@ fi
 # Store the value of previous_result in a file
 echo "$formatted_result" >$SCRIPT_DIR/previous_result.txt
 
-log_with_date "script finished"
+log_with_date "Script finished"
