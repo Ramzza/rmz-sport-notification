@@ -52,6 +52,6 @@ else
 fi
 
 # Execute the GET request with the provided cookie and return the result
-curl -s -H "cookie: client_session=$cookie_value" "$CONST_URL_OWN_RESERVATION" | jq -r '.appointments[] | "\(.appointment_date) \(.appointment_time) \(.business_name)"'
+curl -skH "cookie: client_session=$cookie_value" "$CONST_URL_OWN_RESERVATION" | jq -r '.appointments[] | "\(.appointment_date) \(.appointment_time) \(.business_name)"'
 
 log_with_date "script finished"
