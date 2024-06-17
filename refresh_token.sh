@@ -41,7 +41,7 @@ fi
 if [ "$#" -ne 1 ]; then
     if [ -z "$CONST_COOKIE" ]; then
         log_with_date "Usage: $0 <cookie_value>"
-        log_with_date "Or set CONST_COOKIE environment variable."
+        log_with_date "Or set CONST_COOKIE environment variable. Script finished"
         exit 1
     else
         cookie_value="$CONST_COOKIE"
@@ -55,7 +55,7 @@ log_with_date "Checking token validity..."
 status_code=$(curl -skI -H "cookie: client_session=$cookie_value" "$CONST_URL_OWN_RESERVATION" | head -n 1 | awk '{print $2}')
 
 if [ "$status_code" -ne 401 ]; then
-    log_with_date "Token is still valid"
+    log_with_date "Token is still valid. Script finished"
     exit 0
 fi
 
