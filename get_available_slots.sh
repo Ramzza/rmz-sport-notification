@@ -7,6 +7,19 @@ SCRIPT_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$SCRIPT_DIR/.env"
 log_file="$SCRIPT_DIR/$(basename "$0" .sh).log"
 
+# Load environment variables from .env file
+if [ -f "$ENV_FILE" ]; then
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^\s*#.*$ || -z "$line" ]]; then
+            continue
+        fi
+        key=$(echo "$line" | cut -d '=' -f 1)
+        value=$(echo "$line" | cut -d '=' -f 2-)
+        value=$(echo "$value" | sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' -e 's/^[ \t]*//;s/[ \t]*$//')
+        eval "$key='$value'"
+    done <"$ENV_FILE"
+fi
+
 # Function to prepend current date and time to log messages
 log_with_date() {
     echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
@@ -51,23 +64,19 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-# Check if the required arguments are provided
-if [ -z "$cookie" ] || [ -z "$location_id" ] || [ -z "$service_id" ]; then
-    log_with_date "Usage: $0 --cookie <cookie> --location_id <location_id> --service_id <service_id> [--staff_id <staff_id>] [--date <YYYY-MM-DD>] [--convenient_hours <hours>]"
-    exit 1
+if [ -z "$cookie" ]; then
+    if [ -z "$CONST_COOKIE" ]; then
+        log_with_date "Cookie is required. Please provide a cookie or set CONST_COOKIE."
+        exit 1
+    else
+        cookie="$CONST_COOKIE"
+    fi
 fi
 
-# Load environment variables from .env file
-if [ -f "$ENV_FILE" ]; then
-    while IFS= read -r line; do
-        if [[ "$line" =~ ^\s*#.*$ || -z "$line" ]]; then
-            continue
-        fi
-        key=$(echo "$line" | cut -d '=' -f 1)
-        value=$(echo "$line" | cut -d '=' -f 2-)
-        value=$(echo "$value" | sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' -e 's/^[ \t]*//;s/[ \t]*$//')
-        eval "$key='$value'"
-    done <"$ENV_FILE"
+# Check if the required arguments are provided
+if [ -z "$location_id" ] || [ -z "$service_id" ]; then
+    log_with_date "Usage: $0 --cookie <cookie> --location_id <location_id> --service_id <service_id> [--staff_id <staff_id>] [--date <YYYY-MM-DD>] [--convenient_hours <hours>]"
+    exit 1
 fi
 
 # If a date is not provided, calculate the date for two weeks from now

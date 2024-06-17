@@ -66,6 +66,10 @@ while [[ "$#" -gt 0 ]]; do
         time="$2"
         shift
         ;;
+    --place)
+        place="$2"
+        shift
+        ;;
     *)
         log_with_date "Unknown parameter passed: $1"
         exit 1
@@ -95,16 +99,20 @@ if [ -z "$date" ]; then
     date=$(date -d "+2 weeks" +%Y-%m-%d)
 fi
 
-# Invoke get_available_slots.sh with the necessary parameters
-# Note: Adjust the path to get_available_slots.sh as necessary
-output=$("$SCRIPT_DIR/get_available_slots.sh" --cookie "$cookie" --location_id "$location_id" --service_id "$service_id" --date "$date" --convenient_hours "$time")
-staff_id=$(echo "$output" | grep -oE '[0-9]+$' | tail -n1)
+# Use place as staff_id if provided, otherwise invoke get_available_slots.sh
+if [ -n "$place" ]; then
+    staff_id="$place"
+    log_with_date "Using provided place as staff_id: $staff_id"
+else
+    # Invoke get_available_slots.sh with the necessary parameters
+    output=$("$SCRIPT_DIR/get_available_slots.sh" --cookie "$cookie" --location_id "$location_id" --service_id "$service_id" --date "$date" --convenient_hours "$time")
+    staff_id=$(echo "$output" | grep -oE '[0-9]+$' | tail -n1)
+    log_with_date "Found matching slot with staff_id: $staff_id"
+fi
 
 # Parse the output to find a matching slot
 # This is a simplified example; you may need to adjust the parsing logic based on the actual output format
 if [[ "$staff_id" =~ ^[0-9]+$ ]] && ((staff_id > 0)); then
-    log_with_date "Found matching slot with staff_id: $staff_id"
-
     # Call reserve.sh with the necessary parameters
     # Note: Adjust the path to reserve.sh as necessary
     "$SCRIPT_DIR/reserve.sh" "$cookie" "$location_id" "$service_id" "$staff_id" "$date" "$time"
