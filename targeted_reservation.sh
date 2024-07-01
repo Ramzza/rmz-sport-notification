@@ -37,6 +37,9 @@ if [ -f "$ENV_FILE" ]; then
     done <"$ENV_FILE"
 fi
 
+# Initialize user with default value
+user="USER_1"
+
 # Parse named parameters
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -70,6 +73,14 @@ while [[ "$#" -gt 0 ]]; do
         place="$2"
         shift
         ;;
+    --user)
+        user="$2"
+        if ! [[ "$user" =~ ^(USER_1|USER_2|USER_3)$ ]]; then
+            log_with_date "Invalid user. Please specify USER_1, USER_2, or USER_3."
+            exit 1
+        fi
+        shift
+        ;;
     *)
         log_with_date "Unknown parameter passed: $1"
         exit 1
@@ -77,6 +88,12 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
+
+# Dynamically determine the cookie variable name based on the user
+cookie_var_name="CONST_COOKIE_${user#USER_}"
+
+# Use the dynamically determined cookie variable name to get its value
+cookie="${!cookie_var_name}"
 
 # After the parameter parsing loop
 if [ -z "$cookie" ]; then
