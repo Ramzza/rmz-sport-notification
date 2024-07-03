@@ -9,7 +9,7 @@ log_file="$SCRIPT_DIR/$(basename "$0" .sh).log"
 
 # Function to log messages with date and time
 log_with_date() {
-  echo "$(date) - $(basename "$0"): $1" | tee -a $log_file
+  echo "$(date '+%a %Y-%m-%d %H:%M:%S.%3N') - $(basename "$0"): $1" | tee -a $log_file
 }
 
 log_with_date "Script started"
