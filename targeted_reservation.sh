@@ -116,6 +116,8 @@ if [ -z "$date" ]; then
     date=$(date -d "+2 weeks" +%Y-%m-%d)
 fi
 
+"$SCRIPT_DIR/cron_delayer.sh"
+
 # Use place as staff_id if provided, otherwise invoke get_available_slots.sh
 if [ -n "$place" ]; then
     staff_id="$place"
