@@ -79,6 +79,8 @@ jsonBody=$(
 EOF
 )
 
+"$SCRIPT_DIR/cron_delayer.sh"
+
 # Log request details
 log_with_date "request body: $jsonBody"
 
