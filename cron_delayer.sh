@@ -31,9 +31,9 @@ while true; do
     # Determine sleep amount based on the current second
     if [ "$current_minute" != "$start_minute" ]; then
         sleep_amount=0.1
-    elif [ "$current_second" -lt 55 ]; then
+    elif [ "$current_minute" == "$start_minute" ] && [ "$current_second" -lt 54 ]; then
         sleep_amount=5
-    elif [ "$current_second" -lt 59 ]; then
+    elif [ "$current_minute" == "$start_minute" ] && [ "$current_second" -lt 59 ]; then
         sleep_amount=1
     else
         sleep_amount=0.1
